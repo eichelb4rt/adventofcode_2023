@@ -1,6 +1,6 @@
 def solution(input_file: str):
     with open(input_file, 'r') as f:
-        lines = f.read()
+        lines = f.read().splitlines()
     return None
 
 
