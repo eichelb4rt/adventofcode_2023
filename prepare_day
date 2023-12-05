@@ -1,0 +1,46 @@
+#!/bin/bash
+
+COOKIE_FILE="preparation_files/.session"
+EMPTY_SOLUTION_FILE="preparation_files/empty_solution.py"
+
+print_usage() {
+    echo "Usage: ./prepare_day <day> or just ./prepare_day to use the current date"
+}
+
+# find out if we want to use the current day or a specific day
+if [[ -n "$1" ]]; then
+    if ! [[ $1 =~ ^[0-9]+$ ]]; then
+        echo "Error: $1 is not a number." >&2
+        print_usage >&2
+        exit 1
+    fi
+    day="$1"
+else
+    day=$(printf '%(%d)T' -1)
+fi
+# check if the day is in the correct range
+if ((day <= 0 || day > 25)); then
+    echo "Error: Day must be in 1..25." >&2
+    exit 1
+fi
+# make a padded version for my directory and an unpadded version for the curl request
+padded_day=$(printf "%02d" "$day")
+unpadded_day=$((10#$day))
+# check if this stuff already exists to not fumble
+directory="day_$padded_day"
+if [ -d "$directory" ]; then
+    echo "Error: You already have a solution for day $unpadded_day!" >&2
+    exit 1
+fi
+
+mkdir "$directory"
+cp "$EMPTY_SOLUTION_FILE" "$directory/part_1.py"
+cp "$EMPTY_SOLUTION_FILE" "$directory/part_2.py"
+touch "$directory/test_input.txt"
+# if a cookie file exists,
+if [ -f "$COOKIE_FILE" ]; then
+    curl -b "session=$(cat "$COOKIE_FILE")" -s "https://adventofcode.com/2023/day/$unpadded_day/input" -o "$directory/input.txt"
+else
+    echo "Could not fetch input.txt, please save your session cookie in '$COOKIE_FILE'."
+    touch "$directory/input.txt"
+fi
