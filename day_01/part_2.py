@@ -14,8 +14,8 @@ WORD_TO_DIGIT = {
 
 def replace_words(line: str) -> str:
     for word, digit in WORD_TO_DIGIT.items():
-        # append digit after word, so that this insertion doesn't destroy spelled out digits before this one
-        line = line.replace(word, word + str(digit))
+        # word before and after digit, so that this insertion doesn't destroy spelled out digits before and after this one
+        line = line.replace(word, word + str(digit) + word)
     return line
 
 
