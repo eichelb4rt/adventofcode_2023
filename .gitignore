@@ -3,6 +3,7 @@
 
 # secrets
 .session
+input.txt
 
 
 # Byte-compiled / optimized / DLL files
