@@ -1,7 +1,7 @@
 #!/bin/bash
 
-COOKIE_FILE="preparation_files/.session"
-EMPTY_SOLUTION_FILE="preparation_files/empty_solution.py"
+COOKIE_FILE="files_for_preparation/.session"
+EMPTY_SOLUTION_FILE="files_for_preparation/empty_solution.py"
 
 print_usage() {
     echo "Usage: ./prepare_day <day> or just ./prepare_day to use the current date"
