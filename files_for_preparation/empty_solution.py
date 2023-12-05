@@ -7,7 +7,7 @@ def solution(input_file: str):
 def main():
     assert solution("test_input.txt") == EXPECTED_SOLUTION
     answer = solution("input.txt")
-    print(f"<flavor text> {answer}.")
+    print(f"<flavor text>: {answer}")
 
 
 if __name__ == "__main__":
