@@ -43,7 +43,7 @@ def is_mapped_by(source_value: int, map_entry: MapEntry) -> bool:
     return source_range_start <= source_value < source_range_start + range_length
 
 
-def apply_map_entry(source_value: int, map_entry: MapEntry) -> bool:
+def apply_map_entry(source_value: int, map_entry: MapEntry) -> int:
     """Assumes that the value is mapped by the entry."""
 
     destination_range_start, source_range_start, _ = map_entry
