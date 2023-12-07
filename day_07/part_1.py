@@ -56,7 +56,7 @@ def compare_hands(hand_1: Hand, hand_2: Hand) -> int:
     type_2 = compute_type(hand_2)
     # types aren't equal, then return that
     if type_1 != type_2:
-        return type_1 - type_2
+        return type_1.value - type_2.value
     # if types are equal, find the first difference
     for card_1, card_2 in zip(hand_1, hand_2):
         if card_1 != card_2:
