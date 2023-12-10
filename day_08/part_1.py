@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-
-
 STARTING_NODE = "AAA"
 DESTINATION_NODE = "ZZZ"
 
@@ -27,7 +24,6 @@ def compute_path_length(directions: str, neighbours: Neighbours) -> int:
         n_steps += 1
         if current_node == DESTINATION_NODE:
             return n_steps
-            
 
 
 def solution(input_file: str):
@@ -39,8 +35,8 @@ def solution(input_file: str):
 
 
 def main():
-    assert solution("test_input_1.txt") == 2
-    assert solution("test_input_2.txt") == 6
+    assert solution("test_input_1_part_1.txt") == 2
+    assert solution("test_input_2_part_1.txt") == 6
     answer = solution("input.txt")
     print(f"<flavor text>: {answer}")
 
