@@ -171,10 +171,9 @@ def compute_path_length(directions: str, neighbours: Neighbours) -> int:
     # find out how big the individual loops are
     loop_sizes = [find_loop_size(node, directions, neighbours) for node in nodes]
     destination_steps_in_loops = [find_destination_steps_in_loop(node, loop_size, directions, neighbours) for node, loop_size in zip(nodes, loop_sizes)]
-    # numbers of steps where we have reached a destination on all nodes
-    # for all combinations of destination nodes in different loops, solve the system of simultaneous congruencies
-    all_real_destinations = [find_solution_of_simultaneous_congruencies(offsets, loop_sizes) for offsets in itertools.product(*destination_steps_in_loops)]
-    return min(all_real_destinations) + max_loop_size
+    # for all combinations of destination nodes in different loops, solve the system of simultaneous congruencies (that we land on all destinations with the same number of steps)
+    solutions_of_congruencies = [find_solution_of_simultaneous_congruencies(offsets, loop_sizes) for offsets in itertools.product(*destination_steps_in_loops)]
+    return min(solutions_of_congruencies) + max_loop_size
 
 
 def solution(input_file: str):
