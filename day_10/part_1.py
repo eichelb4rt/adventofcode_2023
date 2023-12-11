@@ -83,8 +83,8 @@ def solution(input_file: str):
 
 
 def main():
-    assert solution("test_input_1.txt") == 4
-    assert solution("test_input_2.txt") == 8
+    assert solution("test_input_1_part_1.txt") == 4
+    assert solution("test_input_2_part_1.txt") == 10
     answer = solution("input.txt")
     print(f"<flavor text>: {answer}")
 
