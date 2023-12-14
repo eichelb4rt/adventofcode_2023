@@ -4,6 +4,8 @@ from enum import Enum, auto
 
 
 N_CYCLES = 1000000000
+N_CYCLES_BEFORE_LOOP_CHECK = 1000
+MAX_LOOP_SIZE = 100
 
 
 class Direction(Enum):
@@ -50,49 +52,39 @@ def cycle(rocks: npt.NDArray) -> None:
         tilt(rocks, direction)
 
 
-def compute_load(rocks: npt.NDArray) -> int:
-    return sum([np.sum((rocks[i, :] == "O") * (rocks.shape[0] - i)) for i in range(rocks.shape[0])])
+def compute_load_per_row(n_rows: int) -> npt.NDArray[np.uint64]:
+    return np.array([n_rows - i for i in range(n_rows)], dtype=np.uint64)
+
+
+def compute_load(rock_hash: npt.NDArray[np.bool_]) -> int:
+    load_per_row = compute_load_per_row(rock_hash.shape[0])
+    return np.einsum("ij, i -> ", rock_hash, load_per_row)
+
+
+def hash_rocks(rocks: npt.NDArray) -> npt.NDArray[np.bool_]:
+    return rocks == "O"
+
+
+def find_loop(hashes: list[npt.NDArray[np.bool_]]) -> list[int]:
+    for loop_size in range(1, MAX_LOOP_SIZE):
+        if np.all(hashes[-1] == hashes[-loop_size - 1]):
+            return hashes[-loop_size:]
+    return None
 
 
 def solution(input_file: str):
     with open(input_file, 'r') as f:
         lines = f.read().splitlines()
     rocks = parse_rocks(lines)
-    for _ in range(100000):
+    hashes = []
+    for _ in range(N_CYCLES_BEFORE_LOOP_CHECK):
         cycle(rocks)
-    for _ in range(20):
-        cycle(rocks)
-        print(rocks)
-        print()
-    return compute_load(rocks)
-
-
-def test_implementation():
-    with open("test_input.txt", 'r') as f:
-        lines = f.read().splitlines()
-    rocks = parse_rocks(lines)
-    with open("cycle_1.txt", 'r') as f:
-        lines = f.read().splitlines()
-    rocks_cycle_1 = parse_rocks(lines)
-    with open("cycle_2.txt", 'r') as f:
-        lines = f.read().splitlines()
-    rocks_cycle_2 = parse_rocks(lines)
-    with open("cycle_3.txt", 'r') as f:
-        lines = f.read().splitlines()
-    rocks_cycle_3 = parse_rocks(lines)
-    tilt(rocks, Direction.North)
-    assert compute_load(rocks) == 136
-    cycle(rocks)
-    assert np.all(rocks == rocks_cycle_1)
-    cycle(rocks)
-    assert np.all(rocks == rocks_cycle_2)
-    cycle(rocks)
-    assert np.all(rocks == rocks_cycle_3)
-    print("all tests passed.")
+        hashes.append(hash_rocks(rocks))
+    loop = find_loop(hashes)
+    return compute_load(loop[(N_CYCLES - N_CYCLES_BEFORE_LOOP_CHECK - 1) % len(loop)])
 
 
 def main():
-    test_implementation()
     assert solution("test_input.txt") == 64
     answer = solution("input.txt")
     print(f"<flavor text>: {answer}")
