@@ -1,11 +1,116 @@
+import numpy as np
+import numpy.typing as npt
+from enum import Enum, auto
+
+
+class Direction(Enum):
+    North = auto()
+    South = auto()
+    East = auto()
+    West = auto()
+
+
+Position = npt.NDArray[np.int8]
+Ray = tuple[Position, Direction]
+
+WALK = {
+    Direction.North: np.array([-1, 0], dtype=np.int8),
+    Direction.South: np.array([1, 0], dtype=np.int8),
+    Direction.East: np.array([0, 1], dtype=np.int8),
+    Direction.West: np.array([0, -1], dtype=np.int8),
+}
+
+
+def parse_contraption(lines: list[str]) -> npt.NDArray:
+    return np.array([[c for c in line] for line in lines])
+
+
+def divert_light(tile: str, current_direction: Direction) -> list[Direction]:
+    if tile == ".":
+        return [current_direction]
+    if tile == "/":
+        if current_direction == Direction.North:
+            return [Direction.East]
+        if current_direction == Direction.South:
+            return [Direction.West]
+        if current_direction == Direction.East:
+            return [Direction.North]
+        if current_direction == Direction.West:
+            return [Direction.South]
+        raise ValueError(f"Unknown Direction: {current_direction}")
+    if tile == "\\":
+        if current_direction == Direction.North:
+            return [Direction.West]
+        if current_direction == Direction.South:
+            return [Direction.East]
+        if current_direction == Direction.East:
+            return [Direction.South]
+        if current_direction == Direction.West:
+            return [Direction.North]
+        raise ValueError(f"Unknown Direction: {current_direction}")
+    if tile == "|":
+        if current_direction in [Direction.North, Direction.South]:
+            return [current_direction]
+        return [Direction.North, Direction.South]
+    if tile == "-":
+        if current_direction in [Direction.East, Direction.West]:
+            return [current_direction]
+        return [Direction.East, Direction.West]
+
+
+def visualize(bool_array: npt.NDArray[np.bool_]) -> npt.NDArray:
+    visualization = np.full(bool_array.shape, ".")
+    visualization[bool_array] = "#"
+    return visualization
+
+
+def count_energized(contraption: npt.NDArray, starting_ray: Ray) -> int:
+    travelling_light = {direction: np.full(contraption.shape, False) for direction in Direction}
+    rays: list[Ray] = [starting_ray]
+    starting_position, starting_direction = starting_ray
+    travelling_light[starting_direction][*starting_position] = True
+    while len(rays) > 0:
+        # walk 1 step
+        ray_position, ray_direction = rays.pop()
+        new_directions = divert_light(contraption[*ray_position], ray_direction)
+        # keep computing relevant paths
+        for new_direction in new_directions:
+            new_position = ray_position + WALK[new_direction]
+            # if we reached the edge, we can stop
+            if np.any(new_position < 0) or np.any(new_position >= contraption.shape):
+                continue
+            # if we've already seen this ray, we can stop
+            if travelling_light[new_direction][*new_position]:
+                continue
+            rays.append((new_position, new_direction))
+            travelling_light[new_direction][*new_position] = True
+    return np.count_nonzero(travelling_light[Direction.North] | travelling_light[Direction.South] | travelling_light[Direction.East] | travelling_light[Direction.West])
+
+
+def find_max_energized(contraption: npt.NDArray) -> int:
+    all_possibilities = []
+    for x in range(contraption.shape[1]):
+        starting_ray = (np.array([0, x], dtype=np.int8), Direction.South)
+        all_possibilities.append(count_energized(contraption, starting_ray))
+        starting_ray = (np.array([contraption.shape[0] - 1, x], dtype=np.int8), Direction.North)
+        all_possibilities.append(count_energized(contraption, starting_ray))
+    for y in range(contraption.shape[0]):
+        starting_ray = (np.array([y, 0], dtype=np.int8), Direction.East)
+        all_possibilities.append(count_energized(contraption, starting_ray))
+        starting_ray = (np.array([y, contraption.shape[1] - 1], dtype=np.int8), Direction.West)
+        all_possibilities.append(count_energized(contraption, starting_ray))
+    return max(all_possibilities)
+
+
 def solution(input_file: str):
     with open(input_file, 'r') as f:
         lines = f.read().splitlines()
-    return None
+    contraption = parse_contraption(lines)
+    return find_max_energized(contraption)
 
 
 def main():
-    assert solution("test_input.txt") == EXPECTED_SOLUTION
+    assert solution("test_input.txt") == 51
     answer = solution("input.txt")
     print(f"<flavor text>: {answer}")
 
