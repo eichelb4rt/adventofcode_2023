@@ -66,7 +66,7 @@ def add_direction(blocks: npt.NDArray[np.int64], min_heat_lost: dict[Axis, npt.N
         # walk in the direction, see if it's in bounds
         new_position = current_item.position + n_steps * WALK_STEP[direction]
         if not np.all(new_position >= 0) or not np.all(new_position < blocks.shape):
-            continue
+            return
         # we're still in bounds. add that new position to the work list
         heat_lost += blocks[*new_position]
         # only add the reached node to the work list (and update) if we have not found a better way on that axis
